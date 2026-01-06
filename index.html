@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cartoon Guitar Coach</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-alt: #0b1020;
+      --accent: #ff6b4a;
+      --accent-soft: #ffb89f;
+      --card: #111827;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --ok: #4ade80;
+      --warn: #facc15;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 60%);
+      color: var(--text);
+    }
+    header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f2937;
+      background: rgba(3,7,18,0.92);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    header h1 {
+      font-size: 1.1rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    header h1 span.logo-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffffff, #f97316 35%, #7c2d12 75%);
+      box-shadow: 0 0 18px rgba(248, 113, 113, 0.7);
+      position: relative;
+    }
+    header h1 span.logo-icon::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 2px solid rgba(15,23,42,0.9);
+    }
+    nav {
+      display: flex;
+      gap: 8px;
+    }
+    nav button {
+      background: transparent;
+      border: 1px solid #374151;
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    nav button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #020617;
+      font-weight: 600;
+    }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #111827, #020617 70%);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(55,65,81,0.7);
+      box-shadow: 0 20px 50px rgba(15,23,42,0.8);
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+    .card p {
+      margin: 4px 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.8);
+      font-size: 0.75rem;
+      color: var(--muted);
+      border: 1px solid #1f2937;
+    }
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 6px rgba(74,222,128,0.9);
+    }
+
+    .xp-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: #020617;
+      overflow: hidden;
+      border: 1px solid #111827;
+      margin-top: 8px;
+    }
+    .xp-fill {
+      height: 100%;
+      width: 40%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #22c55e, #facc15, #f97316);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.9);
+    }
+
+    .today-goals {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .goal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid #111827;
+      font-size: 0.85rem;
+    }
+    .goal-item span.label {
+      color: var(--muted);
+    }
+    .goal-item button {
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: transparent;
+      color: var(--text);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .missions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .mission-card {
+      background: rgba(15,23,42,0.96);
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid #1f2937;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, border 0.1s ease;
+    }
+    .mission-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(15,23,42,0.9);
+      border-color: var(--accent-soft);
+    }
+    .mission-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .mission-tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--accent-soft);
+    }
+    .mission-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .mission-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .tool-card {
+      background: rgba(15,23,42,0.95);
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid #1f2937;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      color: #020617;
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(248, 113, 113, 0.5);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    .metronome-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .metronome-controls input {
+      width: 80px;
+      background: #020617;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      padding: 4px 8px;
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+    .metronome-controls button {
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: rgba(15,23,42,0.9);
+      color: var(--text);
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .cartoon-panel {
+      position: sticky;
+      top: 64px;
+    }
+    .cartoon-hero {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .cartoon-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 20% 10%, #ffffff, #f97316 30%, #7c2d12 75%);
+      position: relative;
+      box-shadow: 0 0 28px rgba(248, 113, 113, 0.7);
+      overflow: hidden;
+    }
+    .cartoon-avatar::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 10px;
+      border: 2px solid rgba(15,23,42,0.9);
+    }
+    .cartoon-avatar-guitar {
+      position: absolute;
+      bottom: -2px;
+      right: -6px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #facc15, #b45309 60%);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.8);
+    }
+    .cartoon-text {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .speech-bubble {
+      margin-top: 8px;
+      background: rgba(15,23,42,0.98);
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid #1f2937;
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .speech-bubble::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: -8px;
+      border-width: 0 8px 8px 8px;
+      border-style: solid;
+      border-color: transparent transparent rgba(15,23,42,0.98) transparent;
+    }
+    .speech-footer {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--accent-soft);
+    }
+
+    .list-compact {
+      margin: 6px 0 0 14px;
+      padding: 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .list-compact li { margin-bottom: 3px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    <span class="logo-icon"></span>
+    Cartoon Guitar Coach
+  </h1>
+  <nav>
+    <button class="active" data-view="dashboard">Dashboard</button>
+    <button data-view="missions">Missions</button>
+    <button data-view="tools">Tools</button>
+    <button data-view="library">Library</button>
+  </nav>
+</header>
+
+<main>
+  <!-- LEFT SIDE: MAIN VIEW -->
+  <section id="view-dashboard" class="card">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Day 1 · Beginner Path
+    </div>
+    <h2>Welcome, bandmate 👋</h2>
+    <p>You’re starting a beginner path that teaches real guitar and music fundamentals in tiny, focused missions.</p>
+
+    <div class="xp-bar">
+      <div class="xp-fill" id="xpFill"></div>
+    </div>
+    <p style="font-size:0.8rem;margin-top:4px;color:var(--muted);">
+      XP: <span id="xpScore">40</span> · Streak: <span id="streakDays">1</span> day
+    </p>
+
+    <h3 style="margin-top:14px;font-size:0.9rem;">Today’s focus</h3>
+    <div class="today-goals">
+      <div class="goal-item">
+        <div>
+          <div>Finish 2 missions</div>
+          <span class="label">G chord · Timing basics</span>
+        </div>
+        <button onclick="goMissions()">Start</button>
+      </div>
+      <div class="goal-item">
+        <div>
+          <div>Play with the metronome</div>
+          <span class="label">8 bars at 70 BPM</span>
+        </div>
+        <button onclick="goTools()">Open</button>
+      </div>
+      <div class="goal-item">
+        <div>
+          <div>Learn 1 riff</div>
+          <span class="label">Two‑chord groove</span>
+        </div>
+        <button onclick="goLibrary()">Try</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-missions" class="card" style="display:none;">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Quest 1 · Speak Music & First Chords
+    </div>
+    <h2>Beginner missions</h2>
+    <p>Each mission is 5–10 minutes. Do them in order the first time.</p>
+
+    <div class="missions-grid">
+      <div class="mission-card" onclick="selectMission('pulse')">
+        <div class="mission-header">
+          <span>Mission 1</span>
+          <span class="mission-tag">Timing</span>
+        </div>
+        <div class="mission-title">Feel the Pulse</div>
+        <div class="mission-desc">
+          Clap and strum in time with a click. Goal: stay in time for 8 bars.
+        </div>
+      </div>
+      <div class="mission-card" onclick="selectMission('gChord')">
+        <div class="mission-header">
+          <span>Mission 2</span>
+          <span class="mission-tag">Chords</span>
+        </div>
+        <div class="mission-title">Your First G Chord</div>
+        <div class="mission-desc">
+          Learn a clean G chord and switch from open strings to G in tempo.
+        </div>
+      </div>
+      <div class="mission-card" onclick="selectMission('switchGC')">
+        <div class="mission-header">
+          <span>Mission 3</span>
+          <span class="mission-tag">Chords</span>
+        </div>
+        <div class="mission-title">Switch G ↔ C</div>
+        <div class="mission-desc">
+          Practice G–C changes with a drum loop. Goal: 3 clean switches in a row.
+        </div>
+      </div>
+      <div class="mission-card" onclick="selectMission('notesEA')">
+        <div class="mission-header">
+          <span>Mission 4</span>
+          <span class="mission-tag">Fretboard</span>
+        </div>
+        <div class="mission-title">Find the Notes</div>
+        <div class="mission-desc">
+          Learn the note names on the low E and A strings with quick prompts.
+        </div>
+      </div>
+    </div>
+
+    <div id="missionDetail" style="margin-top:14px;font-size:0.85rem;color:var(--muted);"></div>
+  </section>
+
+  <section id="view-tools" class="card" style="display:none;">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Practice Tools
+    </div>
+    <h2>Tuner & metronome</h2>
+    <p>Use these on every session: tune up, then lock in your timing.</p>
+
+    <div class="tools-grid">
+      <div class="tool-card">
+        <strong>Tuner (basic)</strong>
+        <p style="margin-top:4px;">
+          For now, tune to standard: E–A–D–G–B–E. Use a clip‑on tuner or tuning app, then come back here.
+        </p>
+        <ul class="list-compact">
+          <li>Step 1 – Tune low E string.</li>
+          <li>Step 2 – Match the rest of the strings.</li>
+          <li>Step 3 – Strum a G chord and adjust until it sounds smooth.</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <strong>Metronome</strong>
+        <p style="margin-top:4px;">Set a tempo and play along. Start slow. Slow = clean.</p>
+        <div class="metronome-controls">
+          <label for="bpmInput" style="font-size:0.8rem;">BPM:</label>
+          <input type="number" id="bpmInput" value="70" min="40" max="200" />
+          <button onclick="startMetronome()">Start</button>
+          <button onclick="stopMetronome()">Stop</button>
+        </div>
+        <p id="metronomeStatus" style="font-size:0.8rem;margin-top:6px;color:var(--muted);">
+          Metronome stopped.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-library" class="card" style="display:none;">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Chords & Riffs
+    </div>
+    <h2>Beginner library</h2>
+    <p>Print this mentally: these chords and riffs show up in tons of songs.</p>
+
+    <div class="tools-grid">
+      <div class="tool-card">
+        <strong>Essential open chords</strong>
+        <ul class="list-compact">
+          <li>G major – Your first “big” chord. Use in Mission 2 and 3.</li>
+          <li>C major – Pairs with G for simple songs.</li>
+          <li>D major – Great bright chord; adds variety later.</li>
+          <li>Em – Easiest minor chord, sounds great with G and D.</li>
+        </ul>
+        <p style="margin-top:6px;">
+          Aim for clean sound: every string rings, no buzzing.
+        </p>
+      </div>
+      <div class="tool-card">
+        <strong>Two‑chord groove (G–C)</strong>
+        <p style="margin-top:4px;">Try this pattern with the metronome at 60–80 BPM:</p>
+        <ul class="list-compact">
+          <li>Strum G: down–down–up–up–down–up (4 beats).</li>
+          <li>Switch to C and repeat.</li>
+          <li>Loop for 2–4 minutes.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT SIDE: CARTOON INSTRUCTOR -->
+  <aside class="cartoon-panel">
+    <div class="card">
+      <div class="cartoon-hero">
+        <div class="cartoon-avatar">
+          <div class="cartoon-avatar-guitar"></div>
+        </div>
+        <div class="cartoon-text">
+          <strong style="font-size:0.9rem;">Riff</strong> · your cartoon band‑leader  
+          <p style="margin:2px 0 0;font-size:0.8rem;">
+            “I’ve got the riffs and bad jokes. You bring the guitar and 10 minutes.”
+          </p>
+        </div>
+      </div>
+
+      <div class="speech-bubble" id="speechBubble">
+        <div id="speechText">
+          Let’s start simple: pick Mission 1 to lock in your timing, then Mission 2 to grab your first G chord.
+        </div>
+        <div class="speech-footer">
+          Tip: slow and clean beats fast and messy every time.
+        </div>
+      </div>
+
+      <button class="btn-primary" style="margin-top:10px;" onclick="suggestNextMission()">
+        What should I do next?
+      </button>
+    </div>
+  </aside>
+</main>
+
+<script>
+  const navButtons = document.querySelectorAll("nav button");
+  const views = {
+    dashboard: document.getElementById("view-dashboard"),
+    missions: document.getElementById("view-missions"),
+    tools: document.getElementById("view-tools"),
+    library: document.getElementById("view-library"),
+  };
+  const speechText = document.getElementById("speechText");
+  let currentView = "dashboard";
+  let currentMission = null;
+  let xp = 40;
+
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const view = btn.getAttribute("data-view");
+      switchView(view);
+    });
+  });
+
+  function switchView(view) {
+    currentView = view;
+    Object.values(views).forEach(v => (v.style.display = "none"));
+    views[view].style.display = "block";
+    navButtons.forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-view") === view);
+    });
+    updateSpeechForView();
+  }
+
+  function goMissions() { switchView("missions"); }
+  function goTools() { switchView("tools"); }
+  function goLibrary() { switchView("library"); }
+
+  function updateSpeechForView() {
+    if (currentView === "dashboard") {
+      speechText.textContent =
+        "Hit one or two goals today. Two small wins beat one giant, exhausting session.";
+    } else if (currentView === "missions") {
+      speechText.textContent =
+        "Pick the next mission in order. I’ll keep each one short so you can actually finish it.";
+    } else if (currentView === "tools") {
+      speechText.textContent =
+        "Tune up, then let the metronome boss your strumming around for a few minutes.";
+    } else if (currentView === "library") {
+      speechText.textContent =
+        "These chords and riffs are your starter pack. Learn them well and songs get way easier.";
+    }
+  }
+
+  function selectMission(id) {
+    currentMission = id;
+    const detail = document.getElementById("missionDetail");
+    let html = "";
+    if (id === "pulse") {
+      html = `
+        <h3>Mission 1 · Feel the Pulse</h3>
+        <p><strong>Goal:</strong> Clap and strum in time with a click for 8 bars without drifting.</p>
+        <ol class="list-compact">
+          <li>Set the metronome to 60–70 BPM in the Tools tab.</li>
+          <li>Clap on every click for 1 minute.</li>
+          <li>Now mute the strings and strum down on each click for another minute.</li>
+          <li>Last: alternate clap and strum every 4 bars.</li>
+        </ol>
+      `;
+      speechText.textContent = "Lock in that pulse. If it feels too fast, drop the BPM. Slow is pro.";
+    } else if (id === "gChord") {
+      html = `
+        <h3>Mission 2 · Your First G Chord</h3>
+        <p><strong>Goal:</strong> Play a clean G chord 10 times in a row.</p>
+        <ol class="list-compact">
+          <li>Place your fingers for G (use your usual fingering).</li>
+          <li>Pluck each string one by one. Adjust until every string rings clearly.</li>
+          <li>Strum down slowly 10 times, fixing any buzzing or muted strings.</li>
+          <li>Optional: Set the metronome to 60 BPM and strum once per beat for 8 bars.</li>
+        </ol>
+      `;
+      speechText.textContent = "G is your first big chord. Make it ring clean before you worry about speed.";
+    } else if (id === "switchGC") {
+      html = `
+        <h3>Mission 3 · Switch G ↔ C</h3>
+        <p><strong>Goal:</strong> Switch between G and C smoothly 3 times in a row.</p>
+        <ol class="list-compact">
+          <li>Play a G chord, then pause and move slowly to C, fixing your fingers.</li>
+          <li>Repeat the slow switch 10 times, no metronome.</li>
+          <li>Now set the metronome to 50–60 BPM.</li>
+          <li>Strum G for 4 beats, switch to C for 4 beats. Aim for 3 clean switches in a row.</li>
+        </ol>
+      `;
+      speechText.textContent = "Don’t rush the switch. Slow, accurate changes will speed up on their own later.";
+    } else if (id === "notesEA") {
+      html = `
+        <h3>Mission 4 · Find the Notes (E & A strings)</h3>
+        <p><strong>Goal:</strong> Instantly find a few key notes on the low E and A strings.</p>
+        <ol class="list-compact">
+          <li>Memorize: Low E – 3rd fret G, 5th fret A; A string – 3rd fret C, 5th fret D.</li>
+          <li>Say the note name, then play it. Do this 2–3 times each.</li>
+          <li>Mix them up: have someone call out G, A, C, or D, and you find it.</li>
+          <li>Solo drill: randomly pick a note name in your head, try to find it fast.</li>
+        </ol>
+      `;
+      speechText.textContent = "These notes are your map. The more you know, the less you have to guess on the neck.";
+    }
+    detail.innerHTML = html;
+  }
+
+  // Simple metronome
+  let metronomeTimer = null;
+  let audioCtx = null;
+
+  function clickSound() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.value = 1000;
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.001);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+  }
+
+  function startMetronome() {
+    const bpmInput = document.getElementById("bpmInput");
+    let bpm = parseInt(bpmInput.value, 10);
+    if (isNaN(bpm) || bpm < 40) bpm = 40;
+    if (bpm > 200) bpm = 200;
+    const interval = (60 / bpm) * 1000;
+    stopMetronome();
+    clickSound();
+    metronomeTimer = setInterval(clickSound, interval);
+    document.getElementById("metronomeStatus").textContent =
+      "Metronome running at " + bpm + " BPM.";
+  }
+
+  function stopMetronome() {
+    if (metronomeTimer) {
+      clearInterval(metronomeTimer);
+      metronomeTimer = null;
+    }
+    document.getElementById("metronomeStatus").textContent = "Metronome stopped.";
+  }
+
+  function suggestNextMission() {
+    if (currentView === "missions") {
+      if (!currentMission) {
+        speechText.textContent = "Start with Mission 1, then 2. Timing first, then chords. Always.";
+      } else if (currentMission === "pulse") {
+        speechText.textContent = "Nice pulse. Next up: grab that G chord in Mission 2.";
+      } else if (currentMission === "gChord") {
+        speechText.textContent = "Your G is cooking. Hit Mission 3 to switch between G and C.";
+      } else {
+        speechText.textContent =
+          "You’re on track. Repeat any mission that still feels shaky before you move on.";
+      }
+    } else if (currentView === "dashboard") {
+      speechText.textContent =
+        "Tap ‘Finish 2 missions’ and we’ll walk through them one by one. Small wins.";
+    } else if (currentView === "tools") {
+      speechText.textContent =
+        "Use the metronome for 5 minutes, then hop back to Missions to apply it.";
+    } else {
+      speechText.textContent =
+        "Grab one chord or riff from the library and play it 10–20 times today.";
+    }
+  }
+</script>
+</body>
+</html>
